@@ -1,0 +1,5 @@
+{
+  "name": "Bosbiss Stock Analyst",
+  "description": "A Gen-Z style fundamental stock valuation tool calculating Graham Number and Historical PER with AI-powered insights.",
+  "requestFramePermissions": []
+}
