@@ -5,10 +5,10 @@ const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 export const fetchStockPrice = async (ticker: string): Promise<{ price: number; source?: string } | null> => {
   try {
-    const model = 'gemini-3-flash-preview';
-    const prompt = `Berapa harga saham ${ticker} Indonesia (IDX) saat ini/terbaru? 
-    Jawab HANYA dengan angkanya saja tanpa format mata uang, tanpa titik/koma pemisah ribuan. 
-    Contoh jika harga 4.500, jawab: 4500.`;
+    const model = 'gemini-2.5-flash-lite';
+    const prompt = `Search on Google Finance for the latest stock price of ${ticker} Indonesia (IDX). 
+    Return ONLY the numeric price value. Do not include currency symbols (Rp), dots, or commas. 
+    Example: if the price is 4.500, return 4500.`;
 
     const response = await ai.models.generateContent({
       model: model,
@@ -22,18 +22,22 @@ export const fetchStockPrice = async (ticker: string): Promise<{ price: number; 
     const text = response.text?.trim();
     if (!text) return null;
 
-    // Try to parse number from text (remove non-digits just in case)
+    // Try to parse number from text
     const cleanNumber = text.replace(/[^0-9]/g, '');
     const price = parseInt(cleanNumber);
 
-    // Get source URL if available (Search Grounding requirement)
+    // Get source URL if available
     let source = undefined;
     const groundingChunks = response.candidates?.[0]?.groundingMetadata?.groundingChunks;
     if (groundingChunks && groundingChunks.length > 0) {
-      // Find the first web URI
-      const webChunk = groundingChunks.find((c: any) => c.web?.uri);
+      // Find a web URI, prioritizing google finance if possible
+      const webChunk = groundingChunks.find((c: any) => c.web?.uri && c.web.uri.includes('google.com/finance'));
       if (webChunk) {
         source = webChunk.web.uri;
+      } else {
+        // Fallback to any web uri
+        const anyWebChunk = groundingChunks.find((c: any) => c.web?.uri);
+        if (anyWebChunk) source = anyWebChunk.web.uri;
       }
     }
 
@@ -51,10 +55,10 @@ export const generateBosbissInsight = async (
   calculation: CalculationResult
 ): Promise<string> => {
   try {
-    const model = 'gemini-3-flash-preview';
-    
+    const model = 'gemini-2.0-flash-exp';
+
     const formatCurrency = (val: number) => `Rp ${val.toLocaleString('id-ID')}`;
-    
+
     const prompt = `
       Role: Anda adalah "Bosbiss Stock Analyst", asisten pribadi yang ahli dalam valuasi saham fundamental. Gaya bicara Anda santai, to the point, ala Gen-Z, tapi sangat teliti dalam perhitungan angka.
       
@@ -67,8 +71,8 @@ export const generateBosbissInsight = async (
       
       Hasil Perhitungan Internal:
       - Graham Number: ${formatCurrency(calculation.grahamNumber)} (Status: ${calculation.grahamStatus}, MOS: ${calculation.grahamMos.toFixed(2)}%)
-      ${calculation.histValuation 
-        ? `- Valuasi PER Historis: ${formatCurrency(calculation.histValuation)} (Status: ${calculation.histStatus}, MOS: ${calculation.histMos?.toFixed(2)}%)` 
+      ${calculation.histValuation
+        ? `- Valuasi PER Historis: ${formatCurrency(calculation.histValuation)} (Status: ${calculation.histStatus}, MOS: ${calculation.histMos?.toFixed(2)}%)`
         : ''}
 
       Tugas:

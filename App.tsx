@@ -4,6 +4,7 @@ import { generateBosbissInsight, fetchStockPrice } from './services/geminiServic
 import { InputField } from './components/InputField';
 import { ResultCard } from './components/ResultCard';
 import { WatchlistCard } from './components/WatchlistCard';
+import logo from './logo.svg';
 
 const App: React.FC = () => {
   // Input State
@@ -55,7 +56,7 @@ const App: React.FC = () => {
     const grahamNumber = Math.sqrt(22.5 * numEps * numBvps);
     const grahamDiff = grahamNumber - numPrice;
     const grahamMos = (grahamDiff / grahamNumber) * 100;
-    
+
     let grahamStatus: 'UNDERVALUED' | 'FAIR' | 'OVERVALUED' = 'FAIR';
     if (grahamMos > 15) grahamStatus = 'UNDERVALUED';
     else if (grahamMos < -15) grahamStatus = 'OVERVALUED';
@@ -103,7 +104,7 @@ const App: React.FC = () => {
     } else {
       setAnalysis(prev => ({ ...prev, error: "Gagal ambil harga. Coba input manual aja ya." }));
     }
-    
+
     setIsFetchingPrice(false);
   };
 
@@ -120,7 +121,7 @@ const App: React.FC = () => {
 
     try {
       const result = calculateFairValue();
-      
+
       // Update UI with calculation immediately
       setAnalysis(prev => ({ ...prev, result: result }));
 
@@ -134,7 +135,7 @@ const App: React.FC = () => {
       };
 
       const insightText = await generateBosbissInsight(stockInput, result);
-      
+
       setAnalysis(prev => ({
         ...prev,
         isLoading: false,
@@ -167,7 +168,7 @@ const App: React.FC = () => {
       const filtered = prev.filter(item => item.ticker !== newItem.ticker);
       return [newItem, ...filtered];
     });
-    
+
     // Visual feedback (optional simple alert for now)
     alert(`Mantap! ${ticker.toUpperCase()} udah masuk pantauan.`);
   };
@@ -179,7 +180,7 @@ const App: React.FC = () => {
     setBvps(item.bvps.toString());
     setMeanPer(item.meanPer ? item.meanPer.toString() : '');
     setPriceSource(null);
-    
+
     // Reset analysis result to encourage re-analyze with potentially new price
     setAnalysis({
       isLoading: false,
@@ -193,47 +194,57 @@ const App: React.FC = () => {
   };
 
   const handleDeleteItem = (tickerToDelete: string) => {
-    if(window.confirm(`Yakin mau hapus ${tickerToDelete} dari pantauan?`)) {
+    if (window.confirm(`Yakin mau hapus ${tickerToDelete} dari pantauan?`)) {
       setWatchlist(prev => prev.filter(item => item.ticker !== tickerToDelete));
     }
   };
 
   return (
-    <div className="min-h-screen bg-background p-4 md:p-8 flex justify-center">
-      <div className="w-full max-w-2xl">
-        
+    <div className="min-h-screen bg-background relative overflow-hidden font-sans text-slate-200 selection:bg-primary/30">
+      {/* Background Blobs */}
+      <div className="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
+        <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-primary/20 rounded-full blur-[100px] animate-blob mix-blend-screen"></div>
+        <div className="absolute top-[-10%] right-[-10%] w-[400px] h-[400px] bg-secondary/20 rounded-full blur-[100px] animate-blob animation-delay-2000 mix-blend-screen"></div>
+        <div className="absolute bottom-[-20%] left-[20%] w-[600px] h-[600px] bg-accent/10 rounded-full blur-[120px] animate-blob animation-delay-4000 mix-blend-screen"></div>
+      </div>
+
+      <div className="relative z-10 w-full max-w-3xl mx-auto p-4 md:p-8 flex flex-col items-center">
+
         {/* Header */}
-        <div className="text-center mb-10">
-          <div className="inline-block p-3 rounded-2xl bg-surface border border-slate-700 mb-4 shadow-xl">
-            <span className="text-4xl">👔📈</span>
+        <div className="text-center mb-10 mt-8 animate-fade-in-up">
+          <div className="relative inline-block group">
+            <div className="absolute -inset-1 bg-gradient-to-r from-primary to-secondary rounded-2xl blur opacity-25 group-hover:opacity-75 transition duration-1000 group-hover:duration-200"></div>
+            <div className="relative p-5 rounded-2xl bg-white border border-slate-800 shadow-2xl mb-6 transform transition hover:scale-105 active:scale-95 duration-300">
+              <img src={logo} alt="Bosbiss Logo" className="w-16 h-16 md:w-20 md:h-20 object-contain drop-shadow-[0_0_15px_rgba(99,102,241,0.5)]" />
+            </div>
           </div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-2">
-            Bosbiss Stock Analyst
+          <h1 className="text-4xl md:text-5xl font-extrabold pb-2 bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent mb-3 tracking-tight">
+            Bostock <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">Analyst</span>
           </h1>
-          <p className="text-slate-400">
-            Valuasi fundamental sat-set ala Gen-Z.
+          <p className="text-slate-400 text-lg md:text-xl max-w-lg mx-auto font-light">
+            Valuasi saham <span className="text-slate-200 font-medium">sat-set</span>Fundamental + AI Insight
           </p>
         </div>
 
         {/* Input Form */}
-        <div className="bg-surface rounded-2xl p-6 md:p-8 shadow-xl border border-slate-700 mb-8 relative">
-           {/* Quick Load Info */}
-           {analysis.result === null && ticker && (
-            <div className="absolute top-4 right-6 text-xs text-slate-500 hidden md:block">
-              Isi data & klik Gas Analisa 👇
+        <div className="w-full bg-surface/50 backdrop-blur-xl rounded-3xl p-6 md:p-8 shadow-2xl border border-white/5 mb-8 relative group hover:border-white/10 transition-all duration-500 animate-fade-in-up" style={{ animationDelay: '100ms' }}>
+          {/* Quick Load Info */}
+          {analysis.result === null && ticker && (
+            <div className="absolute top-4 right-6 text-xs text-primary font-semibold hidden md:flex items-center gap-1 bg-primary/10 px-3 py-1 rounded-full border border-primary/20">
+              <span className="animate-pulse">✨</span> Ready to analyze
             </div>
-           )}
+          )}
 
           <form onSubmit={handleAnalyze}>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6">
-              <div className="col-span-1 md:col-span-2 flex flex-col md:flex-row gap-2 items-start">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2">
+              <div className="col-span-1 md:col-span-2 flex flex-col md:flex-row gap-3 items-end mb-2">
                 <div className="flex-grow w-full">
-                  <InputField 
-                    id="ticker" 
-                    label="Kode Saham (Ticker)" 
-                    value={ticker} 
-                    onChange={setTicker} 
-                    placeholder="Misal: BBCA, TLKM" 
+                  <InputField
+                    id="ticker"
+                    label="KODE SAHAM"
+                    value={ticker}
+                    onChange={setTicker}
+                    placeholder="Contoh: BBCA"
                     required
                   />
                 </div>
@@ -241,167 +252,181 @@ const App: React.FC = () => {
                   type="button"
                   onClick={handleFetchPrice}
                   disabled={isFetchingPrice || !ticker}
-                  className={`mt-6 md:mt-0 mb-4 md:mb-0 h-[46px] px-4 rounded-lg font-medium border transition-all whitespace-nowrap
+                  className={`mb-2 h-[52px] px-6 rounded-xl font-semibold border transition-all whitespace-nowrap shadow-lg flex items-center justify-center gap-2
                     ${isFetchingPrice || !ticker
-                      ? 'bg-slate-800 border-slate-700 text-slate-500 cursor-not-allowed' 
-                      : 'bg-indigo-900/30 border-indigo-500/50 text-indigo-400 hover:bg-indigo-900/50 hover:text-indigo-300'}`}
+                      ? 'bg-slate-800/50 border-slate-700 text-slate-500 cursor-not-allowed'
+                      : 'bg-indigo-600/20 border-indigo-500/50 text-indigo-400 hover:bg-indigo-600/30 hover:border-indigo-400 hover:text-white hover:shadow-indigo-500/20 active:scale-95'}`}
                 >
                   {isFetchingPrice ? (
-                    <span className="flex items-center gap-2">
-                       <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></span>
-                       Cari...
-                    </span>
-                  ) : '🔍 Cek Harga'}
+                    <>
+                      <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+                      <span>Loading...</span>
+                    </>
+                  ) : <>🔍 Auto Cek</>}
                 </button>
               </div>
-              
-              <div className="relative">
-                <InputField 
-                  id="price" 
-                  label="Harga Saat Ini (Rp)" 
-                  value={price} 
-                  onChange={setPrice} 
+
+              <div className="relative group/price">
+                <InputField
+                  id="price"
+                  label="HARGA (Rp)"
+                  value={price}
+                  onChange={setPrice}
                   type="number"
-                  placeholder="1000" 
+                  placeholder="0"
                   required
                 />
                 {priceSource && (
-                  <div className="absolute top-0 right-0 text-[10px] text-slate-500 max-w-[150px] truncate">
-                    Source: <a href={priceSource} target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:underline">Google Finance/Search</a>
+                  <div className="absolute top-0 right-0 text-[10px] text-emerald-400 bg-emerald-900/20 px-2 py-0.5 rounded-full border border-emerald-900/50">
+                    ✨ Live Data
                   </div>
                 )}
               </div>
-              
-              <InputField 
-                id="eps" 
-                label="EPS (Annualized/TTM)" 
-                value={eps} 
-                onChange={setEps} 
+
+              <InputField
+                id="eps"
+                label="EPS (TTM)"
+                value={eps}
+                onChange={setEps}
                 type="number"
-                placeholder="150" 
+                placeholder="0"
                 required
               />
-              
-              <InputField 
-                id="bvps" 
-                label="BVPS (Book Value)" 
-                value={bvps} 
-                onChange={setBvps} 
+
+              <InputField
+                id="bvps"
+                label="BVPS"
+                value={bvps}
+                onChange={setBvps}
                 type="number"
-                placeholder="800" 
+                placeholder="0"
                 required
               />
-              
-              <InputField 
-                id="per" 
-                label="Rata-rata PER 5 Tahun" 
-                value={meanPer} 
-                onChange={setMeanPer} 
+
+              <InputField
+                id="per"
+                label="MEAN PER (5Y)"
+                value={meanPer}
+                onChange={setMeanPer}
                 type="number"
-                placeholder="15.5" 
+                placeholder="Optional"
                 optionalLabel="Opsional"
               />
             </div>
 
             {analysis.error && (
-              <div className="mt-4 p-3 bg-red-900/20 border border-red-800 text-red-400 rounded-lg text-sm">
-                ⚠️ {analysis.error}
+              <div className="mt-4 p-4 bg-red-500/10 border border-red-500/20 text-red-200 rounded-xl text-sm flex items-center gap-3 animate-pulse">
+                🚫 <span>{analysis.error}</span>
               </div>
             )}
 
             <button
               type="submit"
               disabled={analysis.isLoading}
-              className={`w-full mt-6 py-4 rounded-xl font-bold text-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg
-                ${analysis.isLoading 
-                  ? 'bg-slate-700 text-slate-400 cursor-not-allowed' 
-                  : 'bg-gradient-to-r from-primary to-accent text-white hover:shadow-primary/25'}`}
+              className={`w-full mt-8 py-3 rounded-xl font-bold text-lg tracking-wide transition-all transform hover:-translate-y-1 active:translate-y-0 active:scale-[0.98] shadow-xl relative overflow-hidden group
+                ${analysis.isLoading
+                  ? 'bg-slate-800 text-slate-400 cursor-not-allowed'
+                  : 'bg-gradient-to-r from-primary via-accent to-secondary text-white hover:shadow-primary/40'}`}
             >
-              {analysis.isLoading ? 'Lagi Mikir...' : 'Gas Analisa, Bos! 🚀'}
+              <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+              <span className="relative flex items-center justify-center gap-2">
+                {analysis.isLoading ? 'Calculating...' : <>🚀 ANALYZE NOW</>}
+              </span>
             </button>
           </form>
         </div>
 
         {/* Results Section */}
         {analysis.result && (
-          <div className="animate-fade-in-up mb-12">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                📊 Hasil Analisa: <span className="text-accent">{ticker.toUpperCase()}</span>
+          <div className="w-full animate-fade-in-up" style={{ animationDelay: '200ms' }}>
+            <div className="flex justify-between items-center mb-6 px-2">
+              <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+                <span className="w-1 h-8 bg-gradient-to-b from-primary to-secondary rounded-full mr-1"></span>
+                Result: <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400">{ticker.toUpperCase()}</span>
               </h2>
-              <button 
+              <button
                 onClick={handleSaveToWatchlist}
-                className="text-xs md:text-sm bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-2 border border-slate-600"
+                className="text-xs font-semibold bg-surface border border-slate-700 hover:border-primary/50 text-slate-300 hover:text-white px-4 py-2 rounded-lg transition-all flex items-center gap-2 group"
               >
-                💾 Simpan Pantauan
+                <span className="group-hover:scale-110 transition-transform">💾</span> SAVE
               </button>
             </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-              <ResultCard 
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8">
+              <ResultCard
                 title="Graham Number"
                 value={analysis.result.grahamNumber}
                 status={analysis.result.grahamStatus}
                 mos={analysis.result.grahamMos}
               />
-              
+
               {analysis.result.histValuation ? (
-                <ResultCard 
-                  title="Valuasi Historical PER"
+                <ResultCard
+                  title="Historical PER Valuation"
                   value={analysis.result.histValuation}
                   status={analysis.result.histStatus!}
                   mos={analysis.result.histMos!}
                 />
               ) : (
-                <div className="bg-surface/50 border border-slate-800 rounded-xl p-6 flex flex-col justify-center items-center text-center">
-                   <span className="text-4xl mb-2">🤷‍♂️</span>
-                   <p className="text-slate-500 text-sm">Data PER 5 Tahun gak diisi, <br/>jadi gak bisa dihitung Bos.</p>
+                <div className="bg-surface/30 border border-slate-800/50 rounded-2xl p-6 flex flex-col justify-center items-center text-center backdrop-blur-sm">
+                  <span className="text-3xl mb-2 opacity-50">📉</span>
+                  <p className="text-slate-500 text-sm font-medium">No Historical Data<br />Input Mean PER to see this.</p>
                 </div>
               )}
             </div>
 
             {/* Insight Section */}
-            <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-6 border border-slate-700 relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
-              
-              <h3 className="text-lg font-bold text-white mb-3 flex items-center gap-2">
-                💡 Insight Bosbiss
-              </h3>
-              
-              {analysis.insight ? (
-                <div className="prose prose-invert prose-p:text-slate-300 max-w-none leading-relaxed">
-                  <p className="whitespace-pre-line">{analysis.insight}</p>
-                </div>
-              ) : (
-                 <div className="flex items-center gap-3 text-slate-400 animate-pulse">
-                    <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce"></div>
-                    <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce delay-100"></div>
-                    <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce delay-200"></div>
-                    <span className="text-sm">Lagi ngetik insight...</span>
-                 </div>
-              )}
+            <div className="bg-gradient-to-br from-surface to-slate-900 rounded-3xl p-1 relative overflow-hidden shadow-2xl mb-12 group">
+              <div className="absolute -inset-1 bg-gradient-to-r from-primary via-accent to-secondary opacity-20 group-hover:opacity-30 transition duration-1000 blur-lg"></div>
+              <div className="relative bg-surface/90 backdrop-blur-xl rounded-[22px] p-6 border border-white/5">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-accent/5 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none"></div>
+
+                <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                  <span className="text-xl">🤖</span> AI Insight <span className="text-xs font-normal text-slate-500 border border-slate-700 rounded px-1.5 py-0.5">Gemini 2.0</span>
+                </h3>
+
+                {analysis.insight ? (
+                  <div className="prose prose-invert prose-p:text-slate-300 max-w-none leading-relaxed text-[15px] font-light">
+                    <p className="whitespace-pre-line">{analysis.insight}</p>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-3 py-4">
+                    <div className="flex gap-1.5">
+                      <div className="w-2 h-2 bg-primary rounded-full animate-bounce"></div>
+                      <div className="w-2 h-2 bg-accent rounded-full animate-bounce [animation-delay:0.1s]"></div>
+                      <div className="w-2 h-2 bg-secondary rounded-full animate-bounce [animation-delay:0.2s]"></div>
+                    </div>
+                    <span className="text-sm text-slate-400 font-medium animate-pulse">Generating strategic insight...</span>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         )}
 
         {/* Watchlist Section */}
-        <div className="border-t border-slate-800 pt-8">
-          <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-            👀 Pantauan Bosbiss <span className="text-sm font-normal text-slate-500 bg-slate-900 px-2 py-0.5 rounded-full border border-slate-800">{watchlist.length} Saham</span>
+        <div className="w-full border-t border-slate-800/50 pt-10 animate-fade-in-up" style={{ animationDelay: '300ms' }}>
+          <h2 className="text-xl font-bold text-slate-200 mb-6 flex items-center gap-3">
+            <span>👀</span> Watchlist
+            <span className="text-xs font-bold text-primary bg-primary/10 px-2.5 py-1 rounded-full border border-primary/20">
+              {watchlist.length}
+            </span>
           </h2>
-          
+
           {watchlist.length === 0 ? (
-            <div className="text-center py-12 bg-surface/30 rounded-2xl border border-slate-800 border-dashed">
-              <span className="text-4xl block mb-2">📭</span>
-              <p className="text-slate-400">Belum ada pantauan nih, Bos.</p>
-              <p className="text-slate-600 text-sm">Analisa dulu terus klik "Simpan Pantauan".</p>
+            <div className="text-center py-16 bg-surface/20 rounded-3xl border border-dashed border-slate-800/60 backdrop-blur-sm">
+              <div className="w-16 h-16 mx-auto bg-slate-800/50 rounded-full flex items-center justify-center mb-4">
+                <span className="text-2xl opacity-50">🔭</span>
+              </div>
+              <p className="text-slate-400 font-medium">Your watchlist is empty.</p>
+              <p className="text-slate-600 text-sm mt-1">Start analyzing to build your portfolio.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 gap-3">
+            <div className="grid grid-cols-1 gap-4">
               {watchlist.map((item) => (
-                <WatchlistCard 
-                  key={item.ticker} 
-                  item={item} 
+                <WatchlistCard
+                  key={item.ticker}
+                  item={item}
                   onLoad={handleLoadItem}
                   onDelete={handleDeleteItem}
                 />
@@ -409,6 +434,12 @@ const App: React.FC = () => {
             </div>
           )}
         </div>
+
+        <footer className="mt-16 text-center text-slate-600 text-sm pb-8">
+          <p className="flex items-center justify-center gap-2 hover:text-slate-500 transition-colors cursor-default">
+            Built with <span className="text-red-500/80">❤</span> by <span className="font-bold text-slate-500">Bostock</span>
+          </p>
+        </footer>
 
       </div>
     </div>
