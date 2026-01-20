@@ -5,7 +5,7 @@ const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 export const fetchStockPrice = async (ticker: string): Promise<{ price: number; source?: string } | null> => {
   try {
-    const model = 'gemini-2.5-flash-lite';
+    const model = 'gemini-2.5-flash';
     const prompt = `Search on Google Finance for the latest stock price of ${ticker} Indonesia (IDX). 
     Return ONLY the numeric price value. Do not include currency symbols (Rp), dots, or commas. 
     Example: if the price is 4.500, return 4500.`;
@@ -55,7 +55,7 @@ export const generateBosbissInsight = async (
   calculation: CalculationResult
 ): Promise<string> => {
   try {
-    const model = 'gemini-2.0-flash-exp';
+    const model = 'gemini-3-flash-preview';
 
     const formatCurrency = (val: number) => `Rp ${val.toLocaleString('id-ID')}`;
 

@@ -382,7 +382,7 @@ const App: React.FC = () => {
                 <div className="absolute top-0 right-0 w-64 h-64 bg-accent/5 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none"></div>
 
                 <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                  <span className="text-xl">🤖</span> AI Insight <span className="text-xs font-normal text-slate-500 border border-slate-700 rounded px-1.5 py-0.5">Gemini 2.0</span>
+                  <span className="text-xl">🤖</span> AI Insight <span className="text-xs font-normal text-slate-500 border border-slate-700 rounded px-1.5 py-0.5">Gemini</span>
                 </h3>
 
                 {analysis.insight ? (
